@@ -23,6 +23,7 @@
 #include <iostream>
 
 #include "AnimationComponent.h"
+#include "ColliderComponent.h"
 #include "LevelLoader.h"
 
 using namespace dae;
@@ -70,27 +71,40 @@ void SetInputMappingKeyboard(dae::GameActor* actor)
 	dae::InputManager::GetInstance().BindCommandToKeyboard(SDL_SCANCODE_RETURN, new dae::Pause(actor));
 }
 
+void AddTextures()
+{
+	auto avatarTexture = dae::ResourceManager::GetInstance().LoadTexture("Avatar.png");
+}
+
 std::vector<std::shared_ptr<dae::GameObject>> SetGameActorsSingle()
 {
 	std::vector<std::shared_ptr<dae::GameObject>> actors;
 
-	// Player 1
-	auto bubble = std::make_shared<dae::GameObject>();
-	auto bubbleTexture = dae::ResourceManager::GetInstance().LoadTexture("Avatar.png");
-	bubble->AddComponent<dae::RenderComponent>(bubbleTexture);
-	//bubble->AddComponent<dae::AnimationComponent>(bubbleTexture, 30, 0, 4, 0.15f); // Example: 4 frames, 0.15s per frame
-	bubble->AddComponent<dae::GameActor>("Avatar.png");
-	bubble->GetComponent<dae::RenderComponent>()->SetSize(30, 40);
+	// replace with generic texture loading
+	auto bubTexture = dae::ResourceManager::GetInstance().LoadTexture("Avatar.png");
 
-	auto* bubbleActor = bubble->GetComponent<dae::GameActor>();
-	bubbleActor->SetPosition(100, 100);
-	bubbleActor->SetSpeed(200.f);
+	int widthTex = bubTexture->GetSize().x / 7;
+	int heightTex = bubTexture->GetSize().y / 6;
 
-	actors.push_back(bubble);
+	// Player 1 components
+	auto bub = std::make_shared<dae::GameObject>();
+	auto* bubActor = bub->AddComponent<dae::GameActor>();
+	auto* collider = bub->AddComponent<dae::ColliderComponent>();
+	auto* bubAnimationTexture = bub->AddComponent<dae::AnimationComponent>(bubTexture, widthTex, heightTex, 5, 0.15f);
+	
+	// Setup Player 1
+	bubActor->SetPosition(100, 100);
+	bubActor->SetSpeed(200.f);
+	bubActor->SetSize(glm::vec2(30, 30));
+
+	collider->SetSize(bubActor->GetSize());
+	bubAnimationTexture->SetSize(bubActor->GetSize());
+
+	actors.push_back(bub);
 
 	// Set input mapping for Player 1
-	SetInputMappingController(bubbleActor, 0);
-	SetInputMappingKeyboard(bubbleActor);
+	SetInputMappingController(bubActor, 0);
+	SetInputMappingKeyboard(bubActor);
 
 	return actors;
 }
@@ -105,20 +119,21 @@ std::vector<std::shared_ptr<dae::GameObject>> SetGameActorsCoop()
 	// *********************************************************
 
 	// Player 2
-	auto Bomberman2 = std::make_shared<dae::GameObject>();
-	auto Bomberman2Texture = dae::ResourceManager::GetInstance().LoadTexture("Sprites/Bomberman2_NoAnim.png");
-	Bomberman2->AddComponent<dae::RenderComponent>(Bomberman2Texture);
-	Bomberman2->AddComponent<dae::GameActor>("Sprites/Bomberman2_NoAnim.png");
-	Bomberman2->GetComponent<dae::RenderComponent>()->SetSize(30, 40);
-
-	auto* bombermanActor2 = Bomberman2->GetComponent<dae::GameActor>();
-	bombermanActor2->SetPosition(200, 100);
-	bombermanActor2->SetSpeed(200.f);
-
-	actors.push_back(Bomberman2);
-
-	// Set input mapping for Player 2
-	SetInputMappingController(bombermanActor2, 1);
+	//auto Bomberman2 = std::make_shared<dae::GameObject>();
+	//auto Bomberman2Texture = dae::ResourceManager::GetInstance().LoadTexture("Sprites/Bomberman2_NoAnim.png");
+	//Bomberman2->AddComponent<dae::RenderComponent>(Bomberman2Texture);
+	//Bomberman2->AddComponent<dae::GameActor>();
+	//Bomberman2->GetComponent<dae::RenderComponent>()->SetSize(30, 40);
+	//
+	//auto* bombermanActor2 = Bomberman2->GetComponent<dae::GameActor>();
+	//bombermanActor2->SetPosition(200, 100);
+	//bombermanActor2->SetSpeed(200.f);
+	//
+	//actors.push_back(Bomberman2);
+	//
+	//
+	//// Set input mapping for Player 2
+	//SetInputMappingController(bombermanActor2, 1);
 
 	return actors;
 }
@@ -156,7 +171,7 @@ void LoadGame()
 
 	auto& scene = dae::SceneManager::GetInstance().CreateScene("Game");
 
-	LevelLoader::LoadLevel("D:\\DAE\\DAE Year 2\\Semester 2\\Programming 4\\Game Engine\\DAE-Prog4-BubbleBobble\\Data\\Level1.txt", scene, 2);
+	LevelLoader::LoadLevel("../Data/Level1.txt", scene, 0);
 
 	auto actors = SetGameActorsSingle();
 
@@ -236,10 +251,11 @@ void LoadMainMenu()
 	auto select = std::make_shared<dae::GameObject>();
 	auto pointerTexture = dae::ResourceManager::GetInstance().LoadTexture("MenuPointer.png");
 	select->AddComponent<dae::RenderComponent>(pointerTexture);
-	select->AddComponent<dae::GameActor>("MenuPointer.png");
+	select->AddComponent<dae::GameActor>();
 	select->GetComponent<dae::RenderComponent>()->SetSize(15, 15);
 	
 	auto* selectActor = select->GetComponent<dae::GameActor>();
+	selectActor->SetGravityOff();
 	selectActor->SetPosition(100,
 		static_cast<float>(HEIGHT) / 2.f + 80);
 	

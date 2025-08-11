@@ -6,9 +6,11 @@
 #include <fstream>
 #include <memory>
 #include <iostream>
+#include "ColliderComponent.h"
 #include "Util.h"
 
 namespace dae {
+	std::vector<std::shared_ptr<dae::GameObject>> LevelLoader::m_SolidBlocks;
 
     void LevelLoader::LoadLevel(const std::string& filename, Scene& scene, int blockIndex)
     {
@@ -30,18 +32,29 @@ namespace dae {
                 char cell = line[x];
                 if (cell == '0') continue;
 
-                auto obj = std::make_shared<GameObject>();
-                obj->SetPosition(static_cast<float>(x * blockSize) * scale, static_cast<float>(y * blockSize) * scale);
-                auto* renderComp = obj->AddComponent<RenderComponent>(tex);
-                renderComp->SetSourceRect(srcRect);
-                renderComp->SetSize(static_cast<float>(blockSize) * scale, static_cast<float>(blockSize) * scale);
-                
+                if (cell == '1' || cell == '2')
+                {
+                    auto obj = std::make_shared<GameObject>();
+                    obj->SetPosition(static_cast<float>(x * blockSize) * scale, static_cast<float>(y * blockSize) * scale);
+                    auto* renderComp = obj->AddComponent<RenderComponent>(tex);
+                    renderComp->SetSourceRect(srcRect);
+                    renderComp->SetSize(static_cast<float>(blockSize) * scale, static_cast<float>(blockSize) * scale);
 
-                scene.Add(obj);
-				std::cout << "Added block at (" << x << ", " << y << ") with texture index: " << blockIndex << std::endl;
+                    auto* collider = obj->AddComponent<ColliderComponent>();
+                    collider->SetSize(glm::vec2(static_cast<float>(blockSize) * scale, static_cast<float>(blockSize) * scale));
+
+                	m_SolidBlocks.push_back(obj);
+
+                    scene.Add(obj);
+                }
             }
             ++y;
         }
     }
+
+    const std::vector<std::shared_ptr<GameObject>>& LevelLoader::GetSolidBlocks()
+    {
+        return m_SolidBlocks;
+    } 
 
 }

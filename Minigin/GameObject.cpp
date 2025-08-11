@@ -9,9 +9,20 @@ void dae::GameObject::FixedUpdate(float /*fixedTimeStep*/) {}
 
 void dae::GameObject::Update(float deltaTime)
 {
-    for (const auto& component : m_Components)
+    for (auto& component : m_Components)
     {
-        component->Update(deltaTime);
+        if (!component->IsDelete())
+            component->Update(deltaTime);
+    }
+
+    m_Components.erase(
+        std::remove_if(m_Components.begin(), m_Components.end(),
+            [](const std::unique_ptr<Component>& comp) { return comp->IsDelete(); }),
+        m_Components.end()
+    );
+
+    for (auto* child : m_Children) {
+        child->Update(deltaTime);
     }
 }
 
@@ -20,6 +31,10 @@ void dae::GameObject::Render() const
     for (const auto& component : m_Components)
     {
         component->Render();
+    }
+
+    for (const auto* child : m_Children) {
+        child->Render();
     }
 }
 

@@ -99,7 +99,7 @@ namespace dae
     ComponentType* GameObject::GetComponent() const
     {
         static_assert(std::is_base_of<Component, ComponentType>::value, "ComponentType must derive from Component");
-
+			
         auto it = m_ComponentMap.find(std::type_index(typeid(ComponentType)));
         if (it != m_ComponentMap.end())
         {
