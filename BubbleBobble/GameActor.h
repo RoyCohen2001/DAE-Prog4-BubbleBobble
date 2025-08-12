@@ -10,16 +10,20 @@
 namespace dae {
     using Event = int;
 
-    class GameActor final : public Component, public Observer, public Subject
+    class GameActor : public Component, public Observer, public Subject
     {
     public:
         GameActor(GameObject* owner);
 
         void Update(float deltaTime) override;
-        void Render() const override{};
+        void Render() const override{}
 
         // Observer
         void OnNotify(Event event, GameObject* gameObject) override;
+        void Notify(Event event, GameObject* gameObject) const
+        {
+            Subject::Notify(event, gameObject);
+		}
 
         // Set variables of the actor
         void SetSpeed(float speed);
@@ -50,6 +54,10 @@ namespace dae {
         {
 			return m_FacingLeft;
         }
+        void SetFacingLeft(bool facingLeft)
+        {
+            m_FacingLeft = facingLeft;
+		}
 
 
         virtual ~GameActor() = default;

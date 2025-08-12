@@ -28,7 +28,7 @@ namespace dae
 
 		void ClearBindings();
 		void BindCommandToGamepad(int controllerIdx, InputState state, Button button, Command* command);
-		void BindCommandToKeyboard(unsigned int key, Command* command);
+		void BindCommandToKeyboard(unsigned int key, InputState state, Command* command);
 
 	private:
 		friend class Singleton<InputManager>;
@@ -42,7 +42,7 @@ namespace dae
 		std::vector<std::unique_ptr<Gamepad>> m_pGamepads;
 		std::vector<std::map<Button, std::pair<Command*, InputState>>> m_GamepadCommands;
 
-		std::map<unsigned int, Command*> m_KeyboardCommands;
+		std::vector<std::map<unsigned int, std::pair<Command*, InputState>>> m_KeyboardCommands;
 
 		unsigned int buttonsPressedThisFrame{};
 		unsigned int buttonsReleasedThisFrame{};

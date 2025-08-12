@@ -1,4 +1,5 @@
 #pragma once
+#include "GameActor.h"
 #include "Minigin.h"
 
 constexpr float WIDTH = dae::Minigin::Width;
@@ -56,7 +57,8 @@ enum class GameFlowEvent
     LEVEL_START,
     LEVEL_COMPLETE,
     TIME_UP,
-    BONUS_STAGE
+    BONUS_STAGE,
+    PAUSE
 };
 
 // Game mode events

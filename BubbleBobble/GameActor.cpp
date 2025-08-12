@@ -1,6 +1,8 @@
 #include "GameActor.h"
 #include "ResourceManager.h"
 #include <iostream>
+
+#include "AnimationComponent.h"
 #include "LevelLoader.h"
 #include "ColliderComponent.h"
 #include "Collision.h"
@@ -96,7 +98,7 @@ void GameActor::SetPosition(float x, float y)
     GetOwner()->SetPosition(x, y);
 }
 
-glm::vec3 dae::GameActor::GetPosition() const
+glm::vec3 GameActor::GetPosition() const
 {
     return GetOwner()->GetTransform().GetPosition();
 }
@@ -106,6 +108,10 @@ void GameActor::Move(const glm::vec2& direction)
     m_MoveDirection = direction;
     if (direction.x > 0) m_FacingLeft = true;
     else if (direction.x < 0) m_FacingLeft = false;
+
+
+    auto* anim = GetOwner()->GetComponent<AnimationComponent>();
+    if (anim) anim->SetFacingLeft(m_FacingLeft);
 
 }
 

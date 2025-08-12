@@ -155,15 +155,15 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="AnimationComponent.cpp" />
     <ClCompile Include="BubbleBobble.cpp" />
+    <ClCompile Include="EnemyActor.cpp" />
     <ClCompile Include="GameActor.cpp" />
     <ClCompile Include="GameCommands.cpp" />
     <ClCompile Include="LevelLoader.cpp" />
     <ClCompile Include="MenuManager.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="AnimationComponent.h" />
+    <ClInclude Include="EnemyActor.h" />
     <ClInclude Include="GameActor.h" />
     <ClInclude Include="GameCommands.h" />
     <ClInclude Include="LevelLoader.h" />

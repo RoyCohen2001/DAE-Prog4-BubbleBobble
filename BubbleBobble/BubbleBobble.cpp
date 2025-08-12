@@ -54,21 +54,21 @@ void SetInputMappingController(dae::GameActor* actor, int controller)
 void SetInputMappingKeyboard(dae::GameActor* actor)
 {
 	// Movement
-	dae::InputManager::GetInstance().BindCommandToKeyboard(SDL_SCANCODE_LEFT, new dae::Move(actor, glm::vec2{ -1, 0 }));
-	dae::InputManager::GetInstance().BindCommandToKeyboard(SDL_SCANCODE_RIGHT, new dae::Move(actor, glm::vec2{ 1, 0 }));
+	dae::InputManager::GetInstance().BindCommandToKeyboard(SDL_SCANCODE_LEFT, InputState::Pressed, new dae::Move(actor, glm::vec2{ -1, 0 }));
+	dae::InputManager::GetInstance().BindCommandToKeyboard(SDL_SCANCODE_RIGHT, InputState::Pressed, new dae::Move(actor, glm::vec2{ 1, 0 }));
 
 	// Jump
-	dae::InputManager::GetInstance().BindCommandToKeyboard(SDL_SCANCODE_UP, new dae::Jump(actor));
-	dae::InputManager::GetInstance().BindCommandToKeyboard(SDL_SCANCODE_SPACE, new dae::Jump(actor));
+	dae::InputManager::GetInstance().BindCommandToKeyboard(SDL_SCANCODE_UP, InputState::UpThisFrame, new dae::Jump(actor));
+	dae::InputManager::GetInstance().BindCommandToKeyboard(SDL_SCANCODE_SPACE, InputState::DownThisFrame, new dae::Jump(actor));
 
 	// Drop down/fall through platform
-	dae::InputManager::GetInstance().BindCommandToKeyboard(SDL_SCANCODE_DOWN, new dae::DropDown(actor));
+	dae::InputManager::GetInstance().BindCommandToKeyboard(SDL_SCANCODE_DOWN, InputState::DownThisFrame, new dae::DropDown(actor));
 
 	// Shoot bubble
-	dae::InputManager::GetInstance().BindCommandToKeyboard(SDL_SCANCODE_Z, new dae::Shoot(actor));
+	dae::InputManager::GetInstance().BindCommandToKeyboard(SDL_SCANCODE_Z, InputState::DownThisFrame, new dae::Shoot(actor));
 
 	// Pause/Menu
-	dae::InputManager::GetInstance().BindCommandToKeyboard(SDL_SCANCODE_RETURN, new dae::Pause(actor));
+	dae::InputManager::GetInstance().BindCommandToKeyboard(SDL_SCANCODE_RETURN, InputState::DownThisFrame, new dae::Pause(actor));
 }
 
 void AddTextures()
@@ -93,7 +93,7 @@ std::vector<std::shared_ptr<dae::GameObject>> SetGameActorsSingle()
 	auto* bubAnimationTexture = bub->AddComponent<dae::AnimationComponent>(bubTexture, widthTex, heightTex, 5, 0.15f);
 	
 	// Setup Player 1
-	bubActor->SetPosition(100, 100);
+	bubActor->SetPosition(50, 50);
 	bubActor->SetSpeed(200.f);
 	bubActor->SetSize(glm::vec2(30, 30));
 
@@ -119,21 +119,31 @@ std::vector<std::shared_ptr<dae::GameObject>> SetGameActorsCoop()
 	// *********************************************************
 
 	// Player 2
-	//auto Bomberman2 = std::make_shared<dae::GameObject>();
-	//auto Bomberman2Texture = dae::ResourceManager::GetInstance().LoadTexture("Sprites/Bomberman2_NoAnim.png");
-	//Bomberman2->AddComponent<dae::RenderComponent>(Bomberman2Texture);
-	//Bomberman2->AddComponent<dae::GameActor>();
-	//Bomberman2->GetComponent<dae::RenderComponent>()->SetSize(30, 40);
-	//
-	//auto* bombermanActor2 = Bomberman2->GetComponent<dae::GameActor>();
-	//bombermanActor2->SetPosition(200, 100);
-	//bombermanActor2->SetSpeed(200.f);
-	//
-	//actors.push_back(Bomberman2);
-	//
-	//
-	//// Set input mapping for Player 2
-	//SetInputMappingController(bombermanActor2, 1);
+	auto avatarTexture = dae::ResourceManager::GetInstance().LoadTexture("Avatar.png");
+
+	int widthTex = avatarTexture->GetSize().x / 7;
+	int heightTex = avatarTexture->GetSize().y / 6;
+	int player2YOffset = 3 * heightTex;
+
+	// Player 2 components
+	auto bob = std::make_shared<dae::GameObject>();
+	auto* bobActor = bob->AddComponent<dae::GameActor>();
+	auto* collider = bob->AddComponent<dae::ColliderComponent>();
+	auto* bobAnimationTexture = bob->AddComponent<dae::AnimationComponent>(avatarTexture, widthTex, heightTex, 5, 0.15f);
+	bobAnimationTexture->SetFrameYOffset(player2YOffset);
+
+	// Setup Player 
+	bobActor->SetPosition(300, 300);
+	bobActor->SetSpeed(200.f);
+	bobActor->SetSize(glm::vec2(30, 30));
+
+	collider->SetSize(bobActor->GetSize());
+	bobAnimationTexture->SetSize(bobActor->GetSize());
+
+	actors.push_back(bob);
+
+	// Set input mapping for Player 1
+	SetInputMappingController(bobActor, 1);
 
 	return actors;
 }
@@ -152,6 +162,8 @@ void LoadVersus()
 void LoadCoop()
 {
 	auto& scene = dae::SceneManager::GetInstance().CreateScene("Coop");
+
+	LevelLoader::LoadLevel("../Data/Level1.txt", scene, 0);
 
 	auto actors = SetGameActorsCoop();
 	for (auto actor : actors)
@@ -275,9 +287,9 @@ void LoadMainMenu()
 	dae::InputManager::GetInstance().BindCommandToGamepad(0, dae::InputState::DownThisFrame, dae::Button::DPAD_UP, new dae::MenuMoveUp(selectActor, &menuManager));
 	dae::InputManager::GetInstance().BindCommandToGamepad(0, dae::InputState::DownThisFrame, dae::Button::A, new dae::MenuSelect(selectActor, &menuManager));
 
-	dae::InputManager::GetInstance().BindCommandToKeyboard(SDL_SCANCODE_DOWN, new dae::MenuMoveDown(selectActor, &menuManager));
-	dae::InputManager::GetInstance().BindCommandToKeyboard(SDL_SCANCODE_UP, new dae::MenuMoveUp(selectActor, &menuManager));
-	dae::InputManager::GetInstance().BindCommandToKeyboard(SDL_SCANCODE_RETURN, new dae::MenuSelect(selectActor, &menuManager));
+	dae::InputManager::GetInstance().BindCommandToKeyboard(SDL_SCANCODE_DOWN,InputState::DownThisFrame, new dae::MenuMoveDown(selectActor, &menuManager));
+	dae::InputManager::GetInstance().BindCommandToKeyboard(SDL_SCANCODE_UP, InputState::DownThisFrame, new dae::MenuMoveUp(selectActor, &menuManager));
+	dae::InputManager::GetInstance().BindCommandToKeyboard(SDL_SCANCODE_RETURN, InputState::DownThisFrame, new dae::MenuSelect(selectActor, &menuManager));
 
 }
 

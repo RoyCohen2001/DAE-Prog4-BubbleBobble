@@ -42,36 +42,58 @@ namespace dae {
 		m_GamepadCommands[controllerIdx][button] = std::make_pair(command, state);
 	}
 	
-	void InputManager::BindCommandToKeyboard(unsigned int key, Command* command)
+	void InputManager::BindCommandToKeyboard(unsigned int key, InputState state, Command* command)
 	{
-		m_KeyboardCommands[key] = command;
+		if (m_KeyboardCommands.empty())
+			m_KeyboardCommands.resize(1);
+
+		m_KeyboardCommands[0][key] = std::make_pair(command, state);
 	}
 	
 	bool InputManager::ProcessKeyboardInput()
 	{
-		SDL_Event e;
-		while (SDL_PollEvent(&e)) {
-			if (e.type == SDL_QUIT) {
-				return false;
-			}
-			if (e.type == SDL_KEYDOWN) {
-				if (e.key.keysym.sym == SDLK_ESCAPE) {
+			static std::vector<Uint8> prevKeyStates(SDL_NUM_SCANCODES, 0);
+			int numKeys = 0;
+			const Uint8* currKeyStates = SDL_GetKeyboardState(&numKeys);
+
+			SDL_Event e;
+			while (SDL_PollEvent(&e)) {
+				if (e.type == SDL_QUIT) {
+					return false;
+				}
+				if (e.type == SDL_KEYDOWN && e.key.keysym.sym == SDLK_ESCAPE) {
 					return false;
 				}
 			}
-			if (e.type == SDL_MOUSEBUTTONDOWN) {;
-			}
 
-			for (const auto& [key, command] : m_KeyboardCommands)
-			{
-				if (SDL_GetKeyboardState(nullptr)[key] && command)
-				{
-					command->Execute();
+			if (!m_KeyboardCommands.empty()) {
+				for (const auto& [key, pair] : m_KeyboardCommands[0]) {
+					Command* command = pair.first;
+					InputState state = pair.second;
+
+					bool execute = false;
+					bool isDown = currKeyStates[key];
+					bool wasDown = prevKeyStates[key];
+
+					switch (state) {
+					case InputState::Pressed:
+						execute = isDown;
+						break;
+					case InputState::DownThisFrame:
+						execute = isDown && !wasDown;
+						break;
+					case InputState::UpThisFrame:
+						execute = !isDown && wasDown;
+						break;
+					}
+
+					if (execute && command)
+						command->Execute();
 				}
 			}
-		}
+			std::copy(currKeyStates, currKeyStates + numKeys, prevKeyStates.begin());
 
-		return true;
+			return true;
 	}
 
 	void InputManager::ProcessControllerInput()
