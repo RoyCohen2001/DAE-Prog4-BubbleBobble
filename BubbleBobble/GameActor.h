@@ -1,14 +1,15 @@
 #pragma once
-#include <memory>
-#include "Util.h"
+#include <iostream>
+#include "Collision.h"
 #include "Transform.h"
-#include "Texture2D.h"
 #include "Component.h"
 #include "Observer.h"
 #include "Subject.h"
 
 namespace dae {
-    using Event = int;
+	class BulletActor;
+
+	using Event = int;
 
     class GameActor : public Component, public Observer, public Subject
     {
@@ -17,6 +18,14 @@ namespace dae {
 
         void Update(float deltaTime) override;
         void Render() const override{}
+
+        virtual void OnCollision(GameObject* other)
+        {
+            if (other->GetTag() == ObjectType::Enemy)
+            {
+                std::cout << "Collision with enemy detected!\n";
+            }
+        }
 
         // Observer
         void OnNotify(Event event, GameObject* gameObject) override;
@@ -28,7 +37,6 @@ namespace dae {
         // Set variables of the actor
         void SetSpeed(float speed);
         void SetPosition(float x, float y);
-
         glm::vec3 GetPosition() const;
 
 		void SetSize(const glm::vec2& size) { m_Size = size; }
@@ -67,6 +75,7 @@ namespace dae {
         GameActor& operator=(GameActor&& other) = delete;
 
     private:
+
         Transform m_Transform;
         float m_Speed = 50.f;
         glm::vec2 m_MoveDirection{ 0.0f, 0.0f };

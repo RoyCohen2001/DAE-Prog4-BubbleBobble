@@ -5,10 +5,19 @@
 #include <unordered_map>
 #include "Transform.h"
 #include "Component.h"
+#include "Texture2D.h"
 
 namespace dae
 {
-    class Texture2D;
+    enum class ObjectType
+    {
+	    Player,
+    	Enemy,
+    	Bullet,
+    	Wall,
+        Bubble,
+        Bounds
+    };
 
     class GameObject final
     {
@@ -22,6 +31,10 @@ namespace dae
 
         void SetParent(GameObject* parent, bool keepWorldPosition);
         void SetLocalPosition(const glm::vec3& pos);
+
+        // Tag system
+        void SetTag(const ObjectType tag) { m_Tag = tag; }
+        const ObjectType& GetTag() const { return m_Tag; }
 
 		GameObject* GetParent() const;
         size_t ChildCount() const;
@@ -62,6 +75,8 @@ namespace dae
         void SetPositionDirty();
 		bool IsChild(GameObject* child) const;
 		glm::vec3 GetWorldPosition() const;
+
+        ObjectType m_Tag;
 
     };
 

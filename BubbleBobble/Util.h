@@ -1,5 +1,4 @@
 #pragma once
-#include "GameActor.h"
 #include "Minigin.h"
 
 constexpr float WIDTH = dae::Minigin::Width;

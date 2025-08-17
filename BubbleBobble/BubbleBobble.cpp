@@ -23,6 +23,7 @@
 #include <iostream>
 
 #include "AnimationComponent.h"
+#include "BulletActor.h"
 #include "ColliderComponent.h"
 #include "LevelLoader.h"
 
@@ -30,6 +31,9 @@ using namespace dae;
 
 static std::vector<std::shared_ptr<dae::GameObject>> g_MenuOptions;
 
+ObjectPool<BulletActor> g_BulletPool(50, []() {
+	return std::make_unique<BulletActor>(nullptr, glm::vec2{ 0,0 }, 200.0f);
+	});
 
 void SetInputMappingController(dae::GameActor* actor, int controller)
 {
@@ -71,18 +75,11 @@ void SetInputMappingKeyboard(dae::GameActor* actor)
 	dae::InputManager::GetInstance().BindCommandToKeyboard(SDL_SCANCODE_RETURN, InputState::DownThisFrame, new dae::Pause(actor));
 }
 
-void AddTextures()
-{
-	auto avatarTexture = dae::ResourceManager::GetInstance().LoadTexture("Avatar.png");
-}
-
 std::vector<std::shared_ptr<dae::GameObject>> SetGameActorsSingle()
 {
 	std::vector<std::shared_ptr<dae::GameObject>> actors;
 
-	// replace with generic texture loading
 	auto bubTexture = dae::ResourceManager::GetInstance().LoadTexture("Avatar.png");
-
 	int widthTex = bubTexture->GetSize().x / 7;
 	int heightTex = bubTexture->GetSize().y / 6;
 
@@ -93,9 +90,10 @@ std::vector<std::shared_ptr<dae::GameObject>> SetGameActorsSingle()
 	auto* bubAnimationTexture = bub->AddComponent<dae::AnimationComponent>(bubTexture, widthTex, heightTex, 5, 0.15f);
 	
 	// Setup Player 1
+	bub->SetTag(ObjectType::Player);
 	bubActor->SetPosition(50, 50);
 	bubActor->SetSpeed(200.f);
-	bubActor->SetSize(glm::vec2(30, 30));
+	bubActor->SetSize(glm::vec2(20, 20));
 
 	collider->SetSize(bubActor->GetSize());
 	bubAnimationTexture->SetSize(bubActor->GetSize());
@@ -132,10 +130,11 @@ std::vector<std::shared_ptr<dae::GameObject>> SetGameActorsCoop()
 	auto* bobAnimationTexture = bob->AddComponent<dae::AnimationComponent>(avatarTexture, widthTex, heightTex, 5, 0.15f);
 	bobAnimationTexture->SetFrameYOffset(player2YOffset);
 
-	// Setup Player 
+	// Setup Player
+	bob->SetTag(ObjectType::Player);
 	bobActor->SetPosition(300, 300);
 	bobActor->SetSpeed(200.f);
-	bobActor->SetSize(glm::vec2(30, 30));
+	bobActor->SetSize(glm::vec2(20, 20));
 
 	collider->SetSize(bobActor->GetSize());
 	bobAnimationTexture->SetSize(bobActor->GetSize());

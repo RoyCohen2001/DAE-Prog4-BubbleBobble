@@ -1,5 +1,7 @@
 #include "ColliderComponent.h"
 
+using namespace dae;
+
 dae::ColliderComponent::ColliderComponent(dae::GameObject* owner) :
 	Component(owner),
 	m_Size(1.0f, 1.0f)

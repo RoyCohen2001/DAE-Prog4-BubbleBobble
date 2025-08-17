@@ -6,10 +6,9 @@ namespace dae
 {
     class ColliderComponent : public Component {
     public:
-        ColliderComponent(dae::GameObject* owner);
+        ColliderComponent(GameObject* owner);
 
-        void Update(float /*deltaTime*/) override {} 
-
+        void Update(float /*deltaTime*/) override {}
         void Render() const override {}
 
         const glm::vec2& GetSize() const;

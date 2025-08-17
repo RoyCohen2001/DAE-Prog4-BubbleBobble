@@ -53,3 +53,12 @@ void dae::AnimationComponent::SetSize(float width, float height)
     m_RenderWidth = width;
     m_RenderHeight = height;
 }
+
+void dae::AnimationComponent::SetAnimation(std::shared_ptr<Texture2D> texture, int frameWidth, int frameHeight, int numFrames, float frameTime)
+{
+    m_Texture = texture;
+    m_FrameWidth = frameWidth;
+    m_FrameHeight = frameHeight;
+    m_NumFrames = numFrames;
+    m_FrameTime = frameTime;
+}

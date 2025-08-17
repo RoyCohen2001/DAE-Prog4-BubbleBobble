@@ -1,7 +1,6 @@
 #pragma once
 #include "Component.h"
 #include "Texture2D.h"
-#include <SDL.h>
 #include <memory>
 
 #include "GameObject.h"
@@ -21,6 +20,8 @@ namespace dae {
 
     	void SetFacingLeft(bool facingLeft) { m_FacingLeft = facingLeft; }
         bool IsFacingLeft() const { return m_FacingLeft; }
+
+        void SetAnimation(std::shared_ptr<Texture2D> texture, int frameWidth, int frameHeight, int numFrames, float frameTime);
     private:
         std::shared_ptr<Texture2D> m_Texture;
         int m_FrameWidth;

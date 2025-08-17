@@ -3,6 +3,14 @@
 
 #include <algorithm>
 
+#include "Collision.h"
+#include "../BubbleBobble/GameActor.h"
+
+namespace dae
+{
+	class GameActor;
+}
+
 using namespace dae;
 
 unsigned int Scene::m_idCounter = 0;
@@ -39,6 +47,23 @@ void Scene::Update(float deltaTime)
 	for(auto& object : m_objects)
 	{
 		object->Update(deltaTime);
+	}
+
+	for (size_t i = 0; i < m_objects.size(); ++i)
+	{
+		for (size_t j = i + 1; j < m_objects.size(); ++j)
+		{
+			auto& objA = m_objects[i];
+			auto& objB = m_objects[j];
+
+			if (dae::Collision::IsColliding(objA.get(), objB.get()))
+			{
+				if (auto* actorA = objA->GetComponent<dae::GameActor>())
+					actorA->OnCollision(objB.get());
+				if (auto* actorB = objB->GetComponent<dae::GameActor>())
+					actorB->OnCollision(objA.get());
+			}
+		}
 	}
 }
 

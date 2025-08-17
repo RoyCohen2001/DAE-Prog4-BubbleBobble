@@ -1,14 +1,16 @@
 #include "GameActor.h"
 #include "ResourceManager.h"
 #include <iostream>
-
 #include "AnimationComponent.h"
 #include "LevelLoader.h"
 #include "ColliderComponent.h"
 #include "Collision.h"
-#include "RenderComponent.h"
+#include "BulletActor.h"
+#include "ObjectPool.h"
 
 using namespace dae;
+
+extern ObjectPool<dae::BulletActor> g_BulletPool;
 
 GameActor::GameActor(GameObject* owner) :
     Component(owner),
@@ -17,9 +19,8 @@ GameActor::GameActor(GameObject* owner) :
 
 }
 
-void dae::GameActor::OnNotify(Event event, GameObject* gameObject)
+void GameActor::OnNotify(Event event, GameObject* gameObject)
 {
-
     Notify(event, gameObject);
 }
 
@@ -56,7 +57,6 @@ void GameActor::Update(float deltaTime)
     float intendedY = newY + m_VelocityY * deltaTime;
 
     bool landed = false;
-    bool hitCeiling = false;
     const auto& solidBlocks = dae::LevelLoader::GetSolidBlocks();
     for (const auto& block : solidBlocks) {
         auto* collider = block->GetComponent<ColliderComponent>();
@@ -64,20 +64,13 @@ void GameActor::Update(float deltaTime)
         glm::vec3 blockPos3 = block->GetTransform().GetPosition();
         glm::vec2 blockPos(blockPos3.x, blockPos3.y);
 
-        glm::vec2 playerPos(newX, intendedY); // Use updated X
+        glm::vec2 playerPos(newX, intendedY);
         if (dae::Collision::CheckColliding(playerPos, m_Size, blockPos, collider->GetSize())) {
             if (m_VelocityY > 0) {
-                // Falling: landed on block
                 intendedY = blockPos.y - m_Size.y;
                 m_VelocityY = 0.0f;
                 m_IsGrounded = true;
                 landed = true;
-            }
-            else if (m_VelocityY < 0) {
-                // Jumping: hit the bottom of a block (ceiling)
-                intendedY = blockPos.y + collider->GetSize().y;
-                m_VelocityY = 0.0f;
-                hitCeiling = true;
             }
             break;
         }
@@ -120,8 +113,15 @@ void GameActor::Shoot()
     if (m_IsShooting) return;
     m_IsShooting = true;
     m_TimeSinceLastShot = 0.0f;
-    // Implement shooting logic here
-    std::cout << "Shooting\n";
+
+    // Acquire a bullet from the pool
+    BulletActor* bullet = g_BulletPool.Acquire();
+    if (!bullet) return;
+
+    glm::vec3 pos = GetPosition();
+    glm::vec2 direction = IsFacingLeft() ? glm::vec2(-1, 0) : glm::vec2(1, 0);
+
+    bullet->Activate(glm::vec2(pos.x, pos.y), direction, 200.0f);
 }
 
 void GameActor::Jump()

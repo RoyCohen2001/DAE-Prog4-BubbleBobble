@@ -10,6 +10,24 @@ namespace dae {
 
     void EnemyActor::Update(float deltaTime)
     {
+        if (m_IsInBubble)
+        {
+            m_BubbleTimer += deltaTime;
+
+
+            glm::vec3 pos = GetPosition();
+            float newY = pos.y - m_BubbleRiseSpeed * deltaTime;
+            newY = std::max(newY, 20.f);
+
+            SetPosition(pos.x, newY);
+
+            if (m_BubbleTimer >= m_BubbleDuration)
+            {
+                Respawn();
+            }
+            return;
+        }
+
         glm::vec3 pos = GetPosition();
         float newX = pos.x + m_Direction.x * m_PatrolSpeed * deltaTime;
 
@@ -26,11 +44,12 @@ namespace dae {
         GameActor::Update(deltaTime);
     }
 
-    void EnemyActor::OnNotify(Event event, GameObject* /*gameObject*/)
+    void EnemyActor::OnNotify(Event /*event*/, GameObject* /*gameObject*/)
     {
-        if (event == static_cast<Event>(PlayerEvent::SHOOT)) {
-            TakeDamage(1);
-        }
+        //if (event == static_cast<Event>(PlayerEvent::SHOOT)) {
+        //    Bubble();
+        //}
+        // Add collision event for player here later
     }
 
     void EnemyActor::SetPatrolArea(float left, float right)
@@ -39,12 +58,39 @@ namespace dae {
         m_PatrolRight = right;
     }
 
-    void EnemyActor::TakeDamage(int amount)
+    void EnemyActor::Bubble()
     {
-        m_Health -= amount;
-        if (m_Health <= 0) {
-            std::cout << "Enemy defeated!\n";
+        if (!m_IsInBubble)
+        {
+            m_IsInBubble = true;
+            m_BubbleTimer = 0.0f;
+
+
         }
+    }
+
+    void EnemyActor::PopBubble()
+    {
+        if (m_IsInBubble)
+        {
+            m_IsInBubble = false;
+            m_BubbleTimer = 0.0f;
+            // Handle enemy death 
+        }
+    }
+
+    void EnemyActor::OnCollision(GameObject* other)
+    {
+        if (other->GetTag() == ObjectType::Player)
+        {
+	        std::cout << "Enemy collided with player!\n";
+        } 
+    }
+
+    void EnemyActor::Respawn()
+    {
+        m_IsInBubble = false;
+        m_BubbleTimer = 0.0f;
     }
 
 }
