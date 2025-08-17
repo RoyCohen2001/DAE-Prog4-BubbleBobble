@@ -26,6 +26,7 @@
 #include "BulletActor.h"
 #include "ColliderComponent.h"
 #include "LevelLoader.h"
+#include "ObjectPool.h"
 
 using namespace dae;
 
